@@ -27,7 +27,7 @@ namespace web_crawler
             }
             else
             {
-                this.htmlBox.Text = text;
+                this.htmlBox.Text += text;
             }
         }
 
@@ -37,16 +37,26 @@ namespace web_crawler
             HtmlAgilityPack.HtmlDocument subDoc = new HtmlAgilityPack.HtmlDocument();
 
             subDoc = web.Load(uri.Scheme + "://" + uri.Host + link);
-
+            
             HtmlNode name = subDoc.GetElementbyId("firstHeading");
             String word = name.SelectNodes(".//span").First().InnerText;
             HtmlNodeCollection wordMeaningNodes = subDoc.DocumentNode.SelectNodes("//dl//dd");
 
-            htmlBox.Text += word + ": \n";
+            AddText(word + ": \n");
             foreach (HtmlNode meaningNode in wordMeaningNodes)
             {
-                htmlBox.Text += meaningNode.InnerText + "\n";
+                AddText(meaningNode.InnerText + "\n");
             }
+        }
+        List<String> FindTopPages(String firstPageUri,String nextPageLinkValue)
+        {
+            List<String> topPages = new List<string>();
+            Uri uri = new Uri(firstPageUri);
+            topPages.Add(uri.LocalPath);
+            HtmlWeb web = new HtmlWeb();
+            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+
+            return topPages;
         }
         public WebCrawler()
         {
@@ -56,8 +66,12 @@ namespace web_crawler
             HtmlWeb web = new HtmlWeb();
             doc = web.Load(uri.OriginalString);
             htmlBox.Text += "Host:" + uri.Host + "\n";
+            htmlBox.Text += "Local path:" + uri.LocalPath + "\n";
             HtmlNode node = doc.GetElementbyId("mw-pages");
 
+            HtmlNodeCollection nextPageNodes = doc.DocumentNode.SelectNodes("//a[. = \"sonraki 200\"]");
+            foreach(HtmlNode nextPageNode in nextPageNodes)
+            htmlBox.Text += "Sonraki = " + nextPageNode.GetAttributeValue("href","/") + "\n";
 
             HtmlNodeCollection nameListNodes = node.SelectNodes(".//li");
             foreach (HtmlNode listNode in nameListNodes)
