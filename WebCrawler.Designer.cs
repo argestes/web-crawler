@@ -1,6 +1,6 @@
 ﻿namespace web_crawler
 {
-    partial class Form1
+    partial class WebCrawler
     {
         /// <summary>
         /// Required designer variable.
@@ -28,12 +28,32 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.htmlBox = new System.Windows.Forms.RichTextBox();
+            this.SuspendLayout();
+            // 
+            // htmlBox
+            // 
+            this.htmlBox.Location = new System.Drawing.Point(21, 12);
+            this.htmlBox.Name = "htmlBox";
+            this.htmlBox.Size = new System.Drawing.Size(384, 226);
+            this.htmlBox.TabIndex = 0;
+            this.htmlBox.Text = "";
+            // 
+            // WebCrawler
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Text = "Form1";
+            this.ClientSize = new System.Drawing.Size(433, 262);
+            this.Controls.Add(this.htmlBox);
+            this.Name = "WebCrawler";
+            this.Text = "Web Crawler";
+            this.ResumeLayout(false);
+
         }
 
         #endregion
+
+        private System.Windows.Forms.RichTextBox htmlBox;
     }
 }
 
