@@ -16,7 +16,7 @@ namespace web_crawler
     public partial class WebCrawler : Form
     {
         delegate void SetTextCallback(string text);
-        
+        private static Semaphore _pool;
         FileStream fs;
         StreamWriter sw;
         private static string DecodeUrlString(string url)
@@ -39,7 +39,7 @@ namespace web_crawler
             }
             else
             {
-               // this.htmlBox.Text += text;
+                this.htmlBox.Text += text;
                 this.sw.Write(text);
                 this.sw.Flush();
             }
@@ -63,7 +63,7 @@ namespace web_crawler
                     }
                     catch (Exception e)
                     {
-                        AddText("reconnecting \n");
+                        AddText("reconnecting \n" + uri.AbsolutePath + "\n");
                     }
                 }
 
@@ -83,12 +83,13 @@ namespace web_crawler
             {
                 AddText(e.StackTrace);
             }
+
+            _pool.Release();
         }
 
         /// <summary>   Searches for the first names. </summary>
         ///
         /// <param name="topPagePath">  Full pathname of the top page html. </param>
-
         void FindNames(String topPagePath)
         {
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
@@ -103,10 +104,12 @@ namespace web_crawler
                 HtmlNode aNode = listNode.SelectNodes(".//a[@href]").First();
                 String link = aNode.GetAttributeValue("href", "/");
                 Uri uri = new Uri(topPageUri.Scheme + "://" + topPageUri.Host + HttpUtility.HtmlDecode(link));
+                _pool.WaitOne();
                 Thread myThread = new Thread(() => this.CrawlNamePage(uri,link));
                 //CrawlNamePage(uri, link);
                 myThread.Start();
             }
+            _pool.Release();
         }
 
         /// <summary>   Searches for the top pages. </summary>
@@ -147,16 +150,18 @@ namespace web_crawler
 
             foreach (String topPage in topPages)
             {
+                _pool.WaitOne();
                 Thread worker = new Thread(() => this.FindNames(uri.Scheme + "://" + uri.Host + HttpUtility.HtmlDecode(topPage)));
 
                 worker.Start();
             }
             return topPages;
         }
+
         public WebCrawler()
         {
             InitializeComponent();
-
+            _pool = new Semaphore(1000, 1000);
             fs = new FileStream("logfile.txt", FileMode.Create, FileAccess.ReadWrite);
             if (fs == null)
                 htmlBox.Text = "File Stream Error!!";
